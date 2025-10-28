@@ -1,27 +1,24 @@
-# streamlit_app.py - THE FINAL, CORRECTED VERSION
+# app/app.py
 
 import os
+import sys
 import json
 import streamlit as st
 from dotenv import load_dotenv
 
-# --- START OF THE GUARANTEED FIX ---
-# This block MUST be at the very top.
-load_dotenv()
+script_dir = os.path.dirname(os.path.abspath(__file__))
+# Get the parent directory (project_root/) and add it to the Python path
+project_root = os.path.dirname(script_dir)
+sys.path.append(project_root)
 
-# THIS IS THE CRITICAL FIX:
+load_dotenv()
 # We tell the OpenAI client to use your REAL GROQ KEY.
 os.environ["OPENAI_API_KEY"] = os.getenv("GROQ_API_KEY")
-
 # We still point it to Groq's server endpoint.
 os.environ["OPENAI_API_BASE"] = "https://api.groq.com/openai/v1"
 
-# We set the model name.
-os.environ["OPENAI_MODEL_NAME"] = "llama-3.3-70b-versatile"
-# --- END OF THE GUARANTEED FIX ---
+os.environ["OPENAI_MODEL_NAME"] = "llama-3.3-70b-versatile" 
 
-
-# The rest of the application can now be imported and run.
 from file_tools.file_loader import detect_and_extract
 from crew import run_pipeline
 from utils import txt_to_docx_bytes
