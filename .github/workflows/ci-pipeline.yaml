@@ -1,0 +1,30 @@
+name: CI Pipeline - Run Tests
+
+# This workflow runs on pushes to the master branch
+on:
+  push:
+    branches: [ master ] # Or 'main' if that's your default branch
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest # Use a standard Linux environment
+
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.10
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+      
+      - name: Run Pytest
+        # We need to provide a dummy Groq key for the agent test to pass
+        # This is safe because we are not making any real API calls
+        run: |
+          GROQ_API_KEY=DUMMY_KEY pytest

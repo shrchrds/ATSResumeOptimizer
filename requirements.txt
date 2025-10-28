@@ -15,3 +15,4 @@ pydantic>=2.8.2
 euriai
 langchain-groq
 langchain-openai
+pytest
