@@ -47,7 +47,7 @@ The application uses a sequential crew of four specialized AI agents, each with 
 ├── agents.py
 ├── crew.py
 ├── requirements.txt
-├── streamlit_app.py
+├── app.py
 ├── tasks.py
 └── utils.py
 ```
@@ -116,9 +116,9 @@ The application will open in your web browser.
 
 ## ⚠️ Important Note on Configuration
 
-This project uses a specific environment variable setup in `streamlit_app.py` to work around a known bug in some versions of the `crewai` library. The library can incorrectly demand an `OPENAI_API_KEY` even when a different LLM provider is specified.
+This project uses a specific environment variable setup in `app.py` to work around a known bug in some versions of the `crewai` library. The library can incorrectly demand an `OPENAI_API_KEY` even when a different LLM provider is specified.
 
-The code in `streamlit_app.py` resolves this by:
+The code in `app.py` resolves this by:
 
 ```python
 # Sets the API key for the OpenAI client to your Groq key
