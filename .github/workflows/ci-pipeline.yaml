@@ -1,13 +1,22 @@
+# .github/workflows/ci-pipeline.yaml
+
 name: CI Pipeline - Run Tests
 
-# This workflow runs on pushes to the master branch
 on:
   push:
     branches: [ master ] # Or 'main' if that's your default branch
 
 jobs:
   build-and-test:
-    runs-on: ubuntu-latest # Use a standard Linux environment
+    runs-on: ubuntu-latest
+
+    # This 'env' block makes the variables available to all steps in the job
+    env:
+      # We provide dummy/redirect variables to bypass the CrewAI bug during testing.
+      # The tests don't make real API calls, so the key value doesn't matter.
+      OPENAI_API_KEY: "DUMMY_KEY_FOR_TESTING"
+      OPENAI_API_BASE: "https://api.groq.com/openai/v1" # Needs a valid URL structure
+      OPENAI_MODEL_NAME: "llama-3.3-70b-versatile"
 
     steps:
       - name: Check out repository code
@@ -24,7 +33,5 @@ jobs:
           pip install -r requirements.txt
       
       - name: Run Pytest
-        # We need to provide a dummy Groq key for the agent test to pass
-        # This is safe because we are not making any real API calls
-        run: |
-          GROQ_API_KEY=DUMMY_KEY pytest
+        # The environment variables defined above are automatically available to this step
+        run: pytest
