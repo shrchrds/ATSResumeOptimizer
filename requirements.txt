@@ -16,3 +16,4 @@ euriai
 langchain-groq
 langchain-openai
 pytest
+langsmith
