@@ -59,8 +59,8 @@ Follow these steps to get the application running locally.
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/your-username/your-repo-name.git
-cd your-repo-name
+git clone https://github.com/shrchrds/ATSResumeOptimizer.git
+cd ATSResumeOptimizer
 ```
 
 ### 2. Create a Virtual Environment
@@ -109,7 +109,7 @@ GROQ_API_KEY="gsk_YourActualGroqApiKeyHere..."
 Once the setup is complete, you can launch the Streamlit web application with a single command:
 
 ```bash
-streamlit run streamlit_app.py
+streamlit run app.py
 ```
 
 The application will open in your web browser.
