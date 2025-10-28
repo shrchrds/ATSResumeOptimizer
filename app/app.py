@@ -25,7 +25,7 @@ from utils import txt_to_docx_bytes
 
 
 st.set_page_config(page_title="ATS Resume Agent (CrewAI)", page_icon="🧠", layout="wide")
-st.title("🧠 ATS-Optimized Resume Agent (CrewAI + Groq)")
+st.title("🧠 ATS-Optimized Resume Agent")
 st.caption("Upload your resume (.pdf or .docx), target a role, and get an ATS-friendly version with scores & quick wins.")
 
 with st.sidebar:
