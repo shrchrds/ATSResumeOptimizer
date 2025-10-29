@@ -1,76 +1,55 @@
-# app/app.py
-
+# The VERY FIRST import MUST be our config file.
+import config
 import os
-import sys
 import json
 import streamlit as st
-from dotenv import load_dotenv
-
-script_dir = os.path.dirname(os.path.abspath(__file__))
-# Get the parent directory (project_root/) and add it to the Python path
-project_root = os.path.dirname(script_dir)
-sys.path.append(project_root)
-
-load_dotenv()
-# We tell the OpenAI client to use your REAL GROQ KEY.
-os.environ["OPENAI_API_KEY"] = os.getenv("GROQ_API_KEY")
-# We still point it to Groq's server endpoint.
-os.environ["OPENAI_API_BASE"] = "https://api.groq.com/openai/v1"
-
-os.environ["OPENAI_MODEL_NAME"] = "llama-3.3-70b-versatile" 
-
 from file_tools.file_loader import detect_and_extract
 from crew import run_pipeline
 from utils import txt_to_docx_bytes
 
-
-st.set_page_config(page_title="ATS Resume Agent (CrewAI)", page_icon="🧠", layout="wide")
+st.set_page_config(page_title="ATS Resume Agent", page_icon="🧠", layout="wide")
 st.title("🧠 ATS-Optimized Resume Agent")
-st.caption("Upload your resume (.pdf or .docx), target a role, and get an ATS-friendly version with scores & quick wins.")
+st.caption("Powered by CrewAI & Groq")
 
+# --- UPDATED SIDEBAR FOR DETAILED STATUS ---
 with st.sidebar:
-    st.subheader("Groq Settings (via OpenAI endpoint)")
-    st.text_input("Model:", value=os.environ["OPENAI_MODEL_NAME"], disabled=True)
-    api_key_loaded = "✅ Groq API Key loaded" if os.getenv("GROQ_API_KEY") else "❌ Groq API Key not found"
-    st.write(api_key_loaded)
+    st.subheader("⚙️ Configuration Status")
+    st.text_input("Model in use:", value=os.getenv("OPENAI_MODEL_NAME"), disabled=True)
+    st.write(f"Groq Key Loaded: {'✅ Yes' if os.getenv('GROQ_API_KEY') else '❌ No'}")
+    
+    # These are the critical checks for LangSmith
+    st.write(f"LangSmith Tracing: {'✅ On' if os.getenv('LANGCHAIN_TRACING_V2') == 'true' else '❌ Off'}")
+    st.write(f"LangSmith Project: `{os.getenv('LANGCHAIN_PROJECT')}`")
+    st.write(f"LangSmith Key Loaded: {'✅ Yes' if os.getenv('LANGCHAIN_API_KEY') else '❌ No'}")
 
-# Inputs and the rest of your UI code is correct...
-colL, colR = st.columns([1,1])
+    if not os.getenv("LANGCHAIN_API_KEY"):
+        st.error("LangSmith API Key is MISSING. Tracing will fail silently.")
+# --- END OF UPDATED SIDEBAR ---
+
+# Main Application UI
+colL, colR = st.columns(2)
+# ... (rest of your UI code is the same) ...
 with colL:
-    up = st.file_uploader("Upload Resume (.pdf or .docx preferred)", type=["pdf", "docx", "txt"])
+    up = st.file_uploader("1. Upload Your Resume", type=["pdf", "docx", "txt"])
 with colR:
-    job_title = st.text_input("Target Job Title (e.g., 'Machine Learning Engineer')")
-    job_desc = st.text_area("Paste Job Description", height=220, placeholder="Paste JD here...")
-
-run_btn = st.button("Run ATS Agent")
-
+    job_title = st.text_input("2. Target Job Title")
+    job_desc = st.text_area("3. Paste the Job Description", height=220)
+run_btn = st.button("🚀 Run ATS Agent")
+# ... (rest of your execution logic is the same) ...
 if run_btn:
-    if up is None:
-        st.error("Please upload a resume file.")
-    elif not job_title or not job_desc.strip():
-        st.error("Please provide a target job title and job description.")
+    # ...
+    if not all([up, job_title, job_desc]):
+        st.error("Please fill in all fields and upload a resume before running.")
     else:
-        ext, raw_text = detect_and_extract(up.name, up.read())
-        if not raw_text.strip():
-            st.error("Could not extract any text from the file.")
-        else:
-            tabs = st.tabs(["Cleaned Resume", "Rewritten (ATS-optimized)", "Final (Refined Bullets)", "ATS Evaluation"])
-            with st.spinner("Running Crew agents..."):
-                cleaned, rewritten, final_resume, evaluation = run_pipeline(
-                    raw_resume_text=raw_text,
-                    job_title=job_title.strip(),
-                    job_description=job_desc.strip()
-                )
-            
-            with tabs[0]:
-                st.subheader("Cleaned Resume (plain text)")
-                st.code(cleaned, language="markdown")
-            with tabs[1]:
-                st.subheader("Rewritten Resume (ATS-optimized)")
-                st.code(rewritten, language="markdown")
-            with tabs[2]:
-                st.subheader("Final Resume (Refined Bullets)")
-                st.code(final_resume, language="markdown")
-            with tabs[3]:
-                st.subheader("ATS Evaluation & Suggestions")
-                st.code(evaluation, language="json")
+        raw_text = detect_and_extract(up.name, up.read())[1]
+        tabs = st.tabs(["Cleaned Resume", "ATS-Optimized Version", "Final Refined Version", "ATS Evaluation"])
+        with st.spinner("Crew at work... Check LangSmith for live traces!"):
+            cleaned, rewritten, final_resume, evaluation = run_pipeline(
+                raw_resume_text=raw_text,
+                job_title=job_title.strip(),
+                job_description=job_desc.strip()
+            )
+        with tabs[0]: st.code(cleaned, language="markdown")
+        with tabs[1]: st.code(rewritten, language="markdown")
+        with tabs[2]: st.code(final_resume, language="markdown")
+        with tabs[3]: st.code(evaluation, language="json")
